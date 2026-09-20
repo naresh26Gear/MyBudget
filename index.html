@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta name="description" content="Your private budget, beautifully simple. Record expenses, understand your spending, and download PDF reports. Works entirely in your browser.">
+  <title>My Budget — Private expense tracker</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="pdf.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <header class="site-header">
+      <a class="brand" href="#dashboard" aria-label="My Budget dashboard"><span class="brand-icon" data-icon="wallet"></span><span>My Budget</span></a>
+      <span class="privacy-label"><span data-icon="lock"></span>Only on this device</span>
+      <div class="header-actions"><button class="icon-button theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode" aria-pressed="true"></button><button class="toolbar-button" id="export-open" hidden><span data-icon="download"></span><span>Export</span></button></div>
+    </header>
+    <p id="storage-warning" class="warning-banner" role="alert" hidden></p>
+    <noscript><p class="warning-banner">Please enable JavaScript to use My Budget. All calculations and storage happen in your browser.</p></noscript>
+    <main id="main" tabindex="-1">
+      <section id="dashboard-panel" role="tabpanel" aria-labelledby="dashboard-tab">
+        <div class="page-heading desktop-heading"><div><p class="eyebrow">YOUR MONEY, AT A GLANCE</p><h1>Overview</h1></div><button class="quiet-button" data-action="budget"><span data-icon="sliders"></span>Manage budget</button></div>
+        <div class="dashboard-grid">
+          <div class="balance-column">
+            <article class="card balance-card">
+              <div class="card-heading"><button class="budget-switch" data-action="budget"><span id="budget-name">Your first budget</span><span data-icon="chevron-down"></span></button><button class="icon-button" data-action="budget" aria-label="Edit budget"><span data-icon="pencil"></span></button></div>
+              <p class="hero-amount" id="spent-value">₹0</p>
+              <p class="spent-caption">Spent out of <strong id="budget-value-inline">₹0</strong></p>
+              <div class="progress-track" role="progressbar" aria-label="Budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="budget-progress"><span></span></div>
+              <div class="balance-footer"><span id="used-label">Set your budget to begin</span><span id="remaining-inline">Ready when you are</span></div>
+            </article>
+            <div class="summary-grid">
+              <article class="card summary-card"><span class="summary-icon" data-icon="wallet"></span><div><p>Total budget</p><strong id="budget-value">₹0</strong></div></article>
+              <article class="card summary-card"><span class="summary-icon green" data-icon="bars"></span><div><p>Remaining</p><strong id="remaining-value" class="positive">₹0</strong></div></article>
+            </div>
+            <button class="primary-button add-button" id="add-expense"><span data-icon="plus"></span><span>Add expense</span></button>
+            <p class="local-note"><span data-icon="lock"></span>Saved automatically in this browser.</p>
+          </div>
+          <article class="card analytics-card">
+            <div class="analytics-heading"><div><h2>Analytics</h2><p id="chart-subtitle">Daily spending</p></div><label class="select-pill"><span class="sr-only">Analytics date range</span><select id="chart-range"><option value="7">7 days</option><option value="30">30 days</option><option value="all">All time</option></select></label></div>
+            <div class="chart-summary" id="chart-summary"><strong id="chart-total">₹0</strong><span id="chart-period">in the last 7 days</span></div>
+            <div class="chart-wrap" id="chart-wrap"></div>
+            <p class="chart-insight" id="chart-insight">Your spending will appear here.</p>
+            <div class="chart-tooltip" id="chart-tooltip" role="status" hidden></div>
+          </article>
+        </div>
+      </section>
+      <section id="history-panel" role="tabpanel" aria-labelledby="history-tab" hidden>
+        <div class="page-heading"><div><p class="eyebrow" id="history-budget-name">YOUR BUDGET</p><h1>Expense history</h1></div><button class="quiet-button desktop-add" data-action="expense"><span data-icon="plus"></span>Add expense</button></div>
+        <div class="history-filters"><label class="search-box"><span data-icon="search"></span><span class="sr-only">Search expenses</span><input id="history-search" type="search" placeholder="Search expenses…" autocomplete="off" maxlength="120"></label><label class="date-filter"><span class="sr-only">Filter expenses by date</span><select id="history-range"><option value="all">All dates</option><option value="7">Last 7 days</option><option value="month">This month</option><option value="custom">Custom dates</option></select></label></div>
+        <div class="date-fields history-dates" id="history-dates" hidden><label>From<input type="date" id="history-from"></label><label>To<input type="date" id="history-to"></label></div>
+        <p class="field-error" id="history-error" role="status" hidden></p>
+        <div class="history-summary"><span id="history-count">0 expenses</span><span>Total <strong id="history-total">₹0</strong></span></div>
+        <div id="history-list" class="card history-list"></div>
+      </section>
+    </main>
+    <nav class="bottom-nav" aria-label="Main navigation"><div role="tablist" aria-label="Budget views"><button id="dashboard-tab" role="tab" aria-selected="true" aria-controls="dashboard-panel" data-tab="dashboard"><span data-icon="home"></span><span>Dashboard</span></button><button id="history-tab" role="tab" aria-selected="false" aria-controls="history-panel" tabindex="-1" data-tab="history"><span data-icon="history"></span><span>History</span></button></div></nav>
+  </div>
+
+  <dialog id="budget-dialog" class="sheet" aria-labelledby="budget-dialog-title">
+    <div class="sheet-handle"></div><div class="sheet-heading"><div><h2 id="budget-dialog-title">Your budget</h2><p>A little planning. A lot more clarity.</p></div><button class="close-button" data-close aria-label="Close budget settings"><span data-icon="x"></span></button></div>
+    <form id="budget-form" novalidate>
+      <label class="field" id="budget-picker-field" hidden>Choose budget<select id="budget-picker"></select></label>
+      <label class="field">Budget name<input id="budget-title-input" name="title" maxlength="60" required placeholder="e.g. September budget" autocomplete="off"></label>
+      <label class="field">Total amount <span class="field-hint">INR</span><div class="amount-input"><span>₹</span><input id="budget-amount-input" name="amount" type="text" inputmode="decimal" placeholder="5,000" required autocomplete="off"></div></label>
+      <p class="field-error" id="budget-error" role="alert" hidden></p>
+      <button class="primary-button" type="submit" id="budget-save">Save budget</button>
+      <button class="text-button" type="button" id="new-budget">Create another budget</button>
+    </form>
+    <details class="data-details"><summary>Backup & restore<span data-icon="chevron-down"></span></summary><p>Records stay in this browser. Clearing site data removes them. Save a backup to keep a copy or move to another device.</p><div class="backup-actions"><button class="secondary-button" id="backup-download"><span data-icon="download"></span>Save backup</button><button class="secondary-button" id="backup-restore"><span data-icon="upload"></span>Restore</button></div><input type="file" id="backup-file" accept="application/json,.json" hidden></details>
+  </dialog>
+
+  <dialog id="expense-dialog" class="sheet" aria-labelledby="expense-dialog-title">
+    <div class="sheet-handle"></div><div class="sheet-heading"><div><h2 id="expense-dialog-title">Add expense</h2><p id="expense-budget-label">Your budget</p></div><button class="close-button" data-close aria-label="Close expense form"><span data-icon="x"></span></button></div>
+    <form id="expense-form" novalidate>
+      <label class="field">Amount <span class="field-hint">INR</span><div class="amount-input expense-amount"><span>₹</span><input id="expense-amount" type="text" inputmode="decimal" placeholder="0" required autocomplete="off"></div></label>
+      <label class="field">Description<input id="expense-description" maxlength="100" placeholder="What did you spend on?" required autocomplete="off"></label>
+      <div class="two-fields"><label class="field">Category<select id="expense-category"><option>Food</option><option>Travel</option><option>Bills</option><option>Shopping</option><option>Health</option><option>Entertainment</option><option>Other</option></select></label><label class="field">Date<input id="expense-date" type="date" required></label></div>
+      <label class="field">Note <span class="field-hint">Optional</span><textarea id="expense-note" rows="2" maxlength="300" placeholder="Anything to remember…"></textarea></label>
+      <p class="field-error" id="expense-error" role="alert" hidden></p>
+      <button class="primary-button" type="submit" id="expense-save">Save expense</button>
+      <button class="text-button danger" type="button" id="expense-delete" hidden>Delete expense</button>
+    </form>
+  </dialog>
+
+  <dialog id="export-dialog" class="sheet" aria-labelledby="export-title">
+    <div class="sheet-handle"></div><div class="sheet-heading"><div><h2 id="export-title">Export PDF</h2><p id="export-budget-name">Your budget</p></div><button class="close-button" data-close aria-label="Close export settings"><span data-icon="x"></span></button></div>
+    <form id="export-form" novalidate>
+      <label class="field">Date range<select id="export-range"><option value="all">All dates</option><option value="month">This month</option><option value="custom">Custom range</option></select></label>
+      <div class="date-fields" id="export-dates" hidden><label>From<input id="export-from" type="date"></label><label>To<input id="export-to" type="date"></label></div>
+      <fieldset class="export-options"><legend>Include in report</legend><div class="grouped-options"><label>Budget summary<input class="switch" id="export-summary" type="checkbox" checked role="switch"></label><label>Expense history<input class="switch" id="export-history" type="checkbox" checked role="switch"></label><label>Category breakdown<input class="switch" id="export-categories" type="checkbox" role="switch"></label></div></fieldset>
+      <p class="export-note" id="export-note">Exports this budget only.</p><p class="field-error" id="export-error" role="alert" hidden></p>
+      <button class="primary-button" type="submit" id="pdf-download"><span data-icon="download"></span><span>Download PDF</span></button>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" class="sheet compact-sheet" aria-labelledby="confirm-title"><div class="sheet-handle"></div><h2 id="confirm-title">Delete expense?</h2><p id="confirm-message"></p><div class="confirm-actions"><button class="secondary-button" id="confirm-cancel">Cancel</button><button class="primary-button" id="confirm-ok">Delete</button></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden><span data-icon="check"></span><span id="toast-text"></span></div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "my-budget",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Private HTML, CSS and JavaScript budget tracker. Vite is optional for local development.",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "8.0.13"
+  }
+}
