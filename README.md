@@ -2,6 +2,8 @@
 
 A private, responsive budget tracker in plain HTML, CSS, and JavaScript. The interface uses an Apple-inspired dark appearance with blue accents and two bottom tabs: Dashboard and History. Use the sun/moon button in the header to switch to light mode. Your choice is remembered in this browser.
 
+Preview Tool: https://naresh26gear.github.io/MyBudget/
+
 ## Run it
 
 1. Extract the whole ZIP into a folder.
